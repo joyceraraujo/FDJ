@@ -7,13 +7,11 @@ Created on Fri Feb 19 18:30:36 2021
 @author: root
 """
 
-import requests, zipfile,re
-import io,os
-import six #to read the content of the files htm
+import requests
 import time #to estimate the time of execution
 import pandas as pd
 from bs4 import BeautifulSoup
-import numpy as np
+
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -28,6 +26,29 @@ def try_open_url(url):
         flag = 0
         page = []
     return page, flag
+
+def df_melt(dfObj): #function to transform the columns of the results in rows. in this way, we will have a only column with results by concurso
+         
+        nb_start = 9 # skiping two first columns because they represent the index of games. 
+        
+        list_col = list(dfObj.columns[nb_start::])
+        print(list_col)
+        dfObj = pd.melt(dfObj, id_vars=['annee_numero_de_tirage','name_lottery_game',"ref_date",'format','new_date', 'day', 'month', 'year', 'day_name'], value_vars=list_col)
+        
+        
+        return dfObj
+
+def calculate_frequency(dfObj,list_cols): #calculate the frequency of occurences over the whole dataset
+        
+        df_frequency = pd.DataFrame(dfObj.groupby(list_cols[0]).size())#Count the frequency a value occurs  
+        df_frequency.reset_index(inplace=True)
+        df_frequency.columns = list_cols  
+           
+
+        df_frequency.sort_values(by=list_cols[1],ascending=False,inplace=True) #order the number that occurs most of time
+        
+        return df_frequency
+    
    
 #sub_url_defaut helps to validate the result of data scrapping.     
 sub_urls_defaut = [#urls to download the files from FDJ website:
@@ -76,32 +97,58 @@ if flag_main_url:
     if sub_urls_from_scrap == sub_urls_defaut:
         
         print("#2: urls extracted successfully from web scrap")
-        main_cols = ['annee_numero_de_tirage', 'jour_de_tirage', 'date_de_tirage','boule_1', 'boule_2', 'boule_3', 'boule_4',
-                 'boule_5', 'numero_chance','boule_6', 'boule_complementaire','1er_ou_2eme_tirage',"name_lottery_game","ref_date"] # for a while...
-    
+        
+        main_cols = ['annee_numero_de_tirage',"name_lottery_game", 'jour_de_tirage', 'date_de_tirage','boule_1', 'boule_2', 'boule_3', 'boule_4',
+                 'boule_5', 'numero_chance','boule_6', 'boule_complementaire','1er_ou_2eme_tirage',"ref_date"] # for a while...
+        
+        
         
         cols_before_2008 = ['boule_6', 'boule_complementaire','1er_ou_2eme_tirage']
         sub_cols_before_2008 = cols_before_2008[0:2] #special lottery games, like GrandLoto/SuperLoto, don't have the column '1er_ou_2eme_tirage'   
     
-        df_concatenated_complet = pd.concat(list_df)
-        df_concatenated_extracted = df_concatenated_complet[main_cols] 
+        df_concat_complet = pd.concat(list_df)
+        df_concat_extrait = df_concat_complet[main_cols] 
     
     
         #Column Date processing.
-        df_concatenated_extracted['format'] = "new format"
-        df_concatenated_extracted.loc[df_concatenated_extracted['ref_date'] == 'Avant octobre 2008', 'format'] = "old format" # that means the game is in old format.        
-        df_concatenated_extracted['date_de_tirage'] = df_concatenated_extracted['date_de_tirage'].astype(str) # Convert the whole column to string is important because the data are in different format (str and int)
-        df_concatenated_extracted['new_date'] = pd.to_datetime(df_concatenated_extracted['date_de_tirage'], errors='coerce') 
-        df_concatenated_extracted.loc[df_concatenated_extracted['format'] == 'new format', 'new_date'] =  pd.to_datetime(df_concatenated_extracted.loc[df_concatenated_extracted['format'] == 'new format', 'date_de_tirage'], format = '%d/%m/%Y')
+        df_concat_extrait['format'] = "new format"
+        df_concat_extrait.loc[df_concat_extrait['ref_date'] == 'Avant octobre 2008', 'format'] = "old format" # that means the game is in old format.        
+        df_concat_extrait['date_de_tirage'] = df_concat_extrait['date_de_tirage'].astype(str) # Convert the whole column to string is important because the data are in different format (str and int)
+        df_concat_extrait['new_date'] = pd.to_datetime(df_concat_extrait['date_de_tirage'], errors='coerce') 
+        df_concat_extrait.loc[df_concat_extrait['format'] == 'new format', 'new_date'] =  pd.to_datetime(df_concat_extrait.loc[df_concat_extrait['format'] == 'new format', 'date_de_tirage'], format = '%d/%m/%Y')
         
-        df_concatenated_extracted["day"] = df_concatenated_extracted['new_date'].map(lambda x: x.day)
-        df_concatenated_extracted["month"] = df_concatenated_extracted['new_date'].map(lambda x: x.month)
-        df_concatenated_extracted["year"] = df_concatenated_extracted['new_date'].map(lambda x: x.year)
-        df_concatenated_extracted["day_name"] = df_concatenated_extracted['new_date'].map(lambda x: x.day_name())
-        df_concatenated_extracted.drop(axis=1, columns =['date_de_tirage','jour_de_tirage'], inplace=True)
+        df_concat_extrait["day"] = df_concat_extrait['new_date'].map(lambda x: x.day)
+        df_concat_extrait["month"] = df_concat_extrait['new_date'].map(lambda x: x.month)
+        df_concat_extrait["year"] = df_concat_extrait['new_date'].map(lambda x: x.year)
+        df_concat_extrait["day_name"] = df_concat_extrait['new_date'].map(lambda x: x.day_name())
+        df_concat_extrait.drop(axis=1, columns =['date_de_tirage','jour_de_tirage'], inplace=True)
+        main_cols = ['annee_numero_de_tirage','name_lottery_game',"ref_date",'format','new_date', 'day', 'month', 'year', 'day_name','boule_1', 'boule_2', 'boule_3', 'boule_4',
+                 'boule_5', 'numero_chance','boule_6', 'boule_complementaire','1er_ou_2eme_tirage'] # for a while...
+        #Melting dataframe
+        df_concat_extrait = df_concat_extrait[main_cols]
+        df_concat_extrait = df_melt(df_concat_extrait)
+        
+        # In order to respect a standard, it will be more coerent to treat only results concerned after 2008 (before rules changing).
+        # So, query is necessary to keep only these data. 
+        df_after2008 =  df_concat_extrait.loc[df_concat_extrait["format"] == 'new format']
+        
+        #Calculating frequencies of numbers.
+        
+        #Overall frequency.
+        #All balls:        
+        list_cols = ["value","frequency"]
+        dict_frequencies = dict()
+        variables_to_count = ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
+        dict_frequencies["overall_frequency-ball"] =  calculate_frequency(df_query,list_cols)
+        #Only lucky number: 
+        variables_to_count = ['numero_chance']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
+        dict_frequencies["overall_frequency-lucky_number"] = calculate_frequency(df_query,list_cols)
     else:
         print("#2: difference between web scrap and url defaut")
-    
+     
+        
 
 
 else:
