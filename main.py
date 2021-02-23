@@ -147,7 +147,7 @@ if flag_main_url:
     
         df_concat_complet = pd.concat(list_df)
         df_concat_extrait = df_concat_complet[main_cols] 
-    
+
     
         #Column Date processing.
         df_concat_extrait['format'] = "new format"
@@ -163,6 +163,13 @@ if flag_main_url:
         df_concat_extrait.drop(axis=1, columns =['date_de_tirage','jour_de_tirage'], inplace=True)
         main_cols = ['annee_numero_de_tirage','name_lottery_game',"ref_date",'format','new_date', 'day', 'month', 'year', 'day_name','boule_1', 'boule_2', 'boule_3', 'boule_4',
                  'boule_5', 'numero_chance','boule_6', 'boule_complementaire','1er_ou_2eme_tirage'] # for a while...
+        
+        
+        df_concat_extrait = df_concat_extrait.sort_values(by=['new_date'], ascending=False)
+        id_game = list(range(1,len(df_concat_complet)+1))
+        df_concat_extrait['annee_numero_de_tirage'] = id_game
+        
+        
         #Melting dataframe
         df_concat_extrait = df_concat_extrait[main_cols]
         df_concat_extrait = df_melt(df_concat_extrait)
@@ -203,7 +210,7 @@ if flag_main_url:
                             "lucky_number" : ['numero_chance']
             }
         name_variables = dict_variables.keys()
-        start = time.time()        
+                
         for name_timeslice in name_timeslices: # Loop through all timeslices
             for name_variable in name_variables: # Loop through variables
                 timeslice = dict_timeslices[name_timeslice]
@@ -239,7 +246,31 @@ if flag_main_url:
                 df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
                 calculate_frequency_by_timeslice_comb_by3(df_query, dict_frequencies_by_timeslice_comb_by3, name_variable, name_timeslice, timeslice,list_cols)
            
+        #Frequency by 'n' last draws : 
+        max_index = df_after2008['new_date'].idxmax() 
+        id_last_draw = df_after2008.loc[max_index,"annee_numero_de_tirage"]
+        dict_frequencies_by_n_last_draws = dict()
+        dict_last_draw  = {
+                               "10" : list(range(id_last_draw,id_last_draw+10)),
+                               "20" : list(range(id_last_draw,id_last_draw+20)),
+                               "30" : list(range(id_last_draw,id_last_draw+30)),
+                                
+                               
+                               }
+        n_last_draws = dict_last_draw.keys()
+        name_timeslice = 'annee_numero_de_tirage'
+        for n in n_last_draws: # Loop through all n-last draws
+            range_n = dict_last_draw[n]
+            range_last_draw = dict_last_draw[n]
+            for name_variable in name_variables: # Loop through variables                
+                variable_to_count = dict_variables[name_variable] 
     
+                df_query = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count)) & (df_after2008['annee_numero_de_tirage'].isin(range_last_draw))]        
+                dict_frequencies_by_n_last_draws[name_variable, n] = calculate_frequency(df_query,list_cols)
+        
+        
+            
+            
        
     else:
         print("#2: difference between web scrap and url defaut")
