@@ -12,7 +12,7 @@ import time #to estimate the time of execution
 import pandas as pd
 from bs4 import BeautifulSoup
 import calendar
-
+from itertools import permutations
 pd.options.mode.chained_assignment = None  # default='warn'
 
        
@@ -49,13 +49,46 @@ def calculate_frequency(dfObj,list_cols): #calculate the frequency of occurences
         
         return df_frequency
     
-def calculate_frequency_by_timeslice(df,dfOut,name_game,name_timeslice,timeslice): #calculate the frequency of occurences over the whole dataset
+def calculate_frequency_by_timeslice(df,dfOut,name_game,name_timeslice,timeslice,list_cols): #calculate the frequency of occurences over the whole dataset
     
     for t in timeslice:
-                       
-           dfOut[name_game,t] =  df[df[name_timeslice]==t].groupby("value").size() 
+           df_group = pd.DataFrame(df[df[name_timeslice]==t].groupby("value").size())
+           df_group.reset_index(inplace=True)
+           df_group.columns = list_cols 
+           
+           dfOut[name_game,t] =  df_group
+
+def calculate_frequency_by_timeslice_comb_by2(df,dfOut,name_game,name_timeslice,timeslice,list_cols): #calculate the frequency of occurences over the whole dataset
+    name_timeslice1 = name_timeslice[0]
+    name_timeslice2 = name_timeslice[1]
+    timeslice1 = timeslice[0]
+    timeslice2 = timeslice[1]
+    
+    for t1 in timeslice1:
+        for t2 in timeslice2:
+           df_group = pd.DataFrame(df[(df[name_timeslice1]==t1) & (df[name_timeslice2]==t2) ].groupby("value").size())
+           df_group.reset_index(inplace=True)
+           df_group.columns = list_cols 
+            
+           dfOut[name_game,t1,t2] = df_group
+           
+def calculate_frequency_by_timeslice_comb_by3(df,dfOut,name_game,name_timeslice,timeslice,list_cols): #calculate the frequency of occurences over the whole dataset
+    name_timeslice1 = name_timeslice[0]
+    name_timeslice2 = name_timeslice[1]
+    name_timeslice3 = name_timeslice[2]
+    timeslice1 = timeslice[0]
+    timeslice2 = timeslice[1]
+    timeslice3 = timeslice[2]
+    
+    for t1 in timeslice1:
+        for t2 in timeslice2:
+            for t3 in timeslice3:
+                df_group = pd.DataFrame(df[(df[name_timeslice1]==t1) & (df[name_timeslice2]==t2) & (df[name_timeslice3]==t3) ].groupby("value").size()) 
+                df_group.reset_index(inplace=True)
+                df_group.columns = list_cols 
+                dfOut[name_game,t1,t2,t3] =  df_group
          
-   
+start = time.time()    
 #sub_url_defaut helps to validate the result of data scrapping.     
 sub_urls_defaut = [#urls to download the files from FDJ website:
 
@@ -157,26 +190,65 @@ if flag_main_url:
         
         #Frequency by a timeslice specified.
         dict_frequencies_by_timeslice = dict()
-       
-        timeslices = [df_query['year'].unique(),df_query['month'].unique(), df_query['day'].unique(), df_query['day_name'].unique()]
-        name_timeslices = ["year", "month", "day","day_name"]
-        variables_to_count = [['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'], ['numero_chance']]
-        name_variables = ["balls","lucky_number"]
+        dict_timeslices = {
+                               "year" : df_query['year'].unique(),
+                               "month" : df_query['month'].unique(),
+                               "day" : df_query['day'].unique(),
+                               "day_name":  df_query['day_name'].unique()                              
+                               
+                               }
+        name_timeslices = dict_timeslices.keys()
         
-        for timeslice, name_timeslice in zip(timeslices,name_timeslices): # Loop through all timeslices
-            for variable_to_count, name_variable in zip(variables_to_count,name_variables): # Loop through variables
-
+        dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],
+                            "lucky_number" : ['numero_chance']
+            }
+        name_variables = dict_variables.keys()
+        start = time.time()        
+        for name_timeslice in name_timeslices: # Loop through all timeslices
+            for name_variable in name_variables: # Loop through variables
+                timeslice = dict_timeslices[name_timeslice]
+                variable_to_count = dict_variables[name_variable]
                 df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
-                calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variable,name_timeslice, timeslice)
+                calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variable,name_timeslice, timeslice,list_cols)
+
+        
+        #Frequency by a combinaison of two timeslices specified.
+        dict_frequencies_by_timeslice_comb_by2 = dict()
+        #Combinaison of two timeslices
+        name_timeslices_perm = list(permutations(name_timeslices,2))
+        name_timeslices_perm = set(tuple(sorted(x)) for x in name_timeslices_perm)
+        
+        for name_timeslice in name_timeslices_perm:
+            
+            for name_variable in name_variables: # Loop through variables
+                timeslice = [dict_timeslices[name_timeslice[0]], dict_timeslices[name_timeslice[1]]]                
+                variable_to_count = dict_variables[name_variable]
+                df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
+                calculate_frequency_by_timeslice_comb_by2(df_query, dict_frequencies_by_timeslice_comb_by2, name_variable, name_timeslice, timeslice,list_cols)
            
+        #Frequency by a combinaison of three timeslices specified.
+        dict_frequencies_by_timeslice_comb_by3 = dict()
+        #Combinaison of two timeslices
+        name_timeslices_perm = list(permutations(name_timeslices,3))
+        name_timeslices_perm = set(tuple(sorted(x)) for x in name_timeslices_perm)
+        
+        for name_timeslice in name_timeslices_perm:            
+            for name_variable in name_variables: # Loop through variables
+                timeslice = [dict_timeslices[name_timeslice[0]], dict_timeslices[name_timeslice[1]], dict_timeslices[name_timeslice[2]]]
+                variable_to_count = dict_variables[name_variable]
+                df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
+                calculate_frequency_by_timeslice_comb_by3(df_query, dict_frequencies_by_timeslice_comb_by3, name_variable, name_timeslice, timeslice,list_cols)
+           
+    
        
     else:
         print("#2: difference between web scrap and url defaut")
      
         
 
-
 else:
     print("#1:A error to read main url was issued")
     
 
+elapsed = time.time() - start
+print(elapsed)
