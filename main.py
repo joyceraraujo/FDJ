@@ -11,7 +11,7 @@ import requests
 import time #to estimate the time of execution
 import pandas as pd
 from bs4 import BeautifulSoup
-
+import calendar
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -32,7 +32,7 @@ def df_melt(dfObj): #function to transform the columns of the results in rows. i
         nb_start = 9 # skiping two first columns because they represent the index of games. 
         
         list_col = list(dfObj.columns[nb_start::])
-        print(list_col)
+        
         dfObj = pd.melt(dfObj, id_vars=['annee_numero_de_tirage','name_lottery_game',"ref_date",'format','new_date', 'day', 'month', 'year', 'day_name'], value_vars=list_col)
         
         
@@ -49,6 +49,12 @@ def calculate_frequency(dfObj,list_cols): #calculate the frequency of occurences
         
         return df_frequency
     
+def calculate_frequency_by_timeslice(df,dfOut,name_game,name_timeslice,timeslice): #calculate the frequency of occurences over the whole dataset
+    
+    for t in timeslice:
+                       
+           dfOut[name_game,t] =  df[df[name_timeslice]==t].groupby("value").size() 
+         
    
 #sub_url_defaut helps to validate the result of data scrapping.     
 sub_urls_defaut = [#urls to download the files from FDJ website:
@@ -132,6 +138,9 @@ if flag_main_url:
         # So, query is necessary to keep only these data. 
         df_after2008 =  df_concat_extrait.loc[df_concat_extrait["format"] == 'new format']
         
+        d = dict(enumerate(calendar.month_abbr))
+        df_after2008['month'] = df_after2008['month'].map(d)
+        
         #Calculating frequencies of numbers.
         
         #Overall frequency.
@@ -140,11 +149,73 @@ if flag_main_url:
         dict_frequencies = dict()
         variables_to_count = ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5']
         df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
-        dict_frequencies["overall_frequency-ball"] =  calculate_frequency(df_query,list_cols)
+        dict_frequencies["overall_frequency-balls"] =  calculate_frequency(df_query,list_cols)
         #Only lucky number: 
         variables_to_count = ['numero_chance']
         df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
         dict_frequencies["overall_frequency-lucky_number"] = calculate_frequency(df_query,list_cols)
+        
+        #Frequency by a timeslice specified.
+        dict_frequencies_by_timeslice = dict()
+        #By year:        
+        first_year = df_after2008 ['year'].min()
+        last_year = df_after2008 ['year'].max()       
+        timeslice = list(range(first_year,last_year+1))   
+        name_timeslice = "year" 
+        #All balls:
+        name_variables = "Balls"
+        variables_to_count = ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]        
+        calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variables,name_timeslice, timeslice)
+        #Only lucky number:
+        name_variables = "lucky_number"
+        variables_to_count = ['numero_chance']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]        
+        calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variables,name_timeslice, timeslice) 
+        
+        #By month:
+        timeslice = df_query['month'].unique()
+        name_timeslice = "month"
+        #All balls:
+        name_variables = "Balls"
+        variables_to_count = ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]        
+        calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variables,name_timeslice, timeslice)
+        #Only lucky number:
+        name_variables = "lucky_number"
+        variables_to_count = ['numero_chance']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]        
+        calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variables,name_timeslice, timeslice ) 
+        
+        #By day:
+        days = list(range(1,32)) 
+        timeslice = "day"
+        #All balls:
+        name_variables = "Balls"
+        variables_to_count = ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]        
+        calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variables,name_timeslice, timeslice )
+        #Only lucky number:
+        name_variables = "lucky_number"
+        variables_to_count = ['numero_chance']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]        
+        calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variables,name_timeslice, timeslice ) 
+        
+        #By day of the week:
+        timeslice = df_query['day_name'].unique()
+        name_timeslice = "day_name"
+        #All balls:
+        name_variables = "Balls"
+        variables_to_count = ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]        
+        calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variables,name_timeslice, timeslice)
+        #Only lucky number:
+        name_variables = "lucky_number"
+        variables_to_count = ['numero_chance']
+        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]        
+        calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variables,name_timeslice, timeslice) 
+        
+       
     else:
         print("#2: difference between web scrap and url defaut")
      
