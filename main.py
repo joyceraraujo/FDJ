@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 import calendar
 from itertools import permutations
 pd.options.mode.chained_assignment = None  # default='warn'
-
+import statistics
        
 def try_open_url(url):
     try:
@@ -267,11 +267,44 @@ if flag_main_url:
     
                 df_query = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count)) & (df_after2008['annee_numero_de_tirage'].isin(range_last_draw))]        
                 dict_frequencies_by_n_last_draws[name_variable, n] = calculate_frequency(df_query,list_cols)
-        
-        
-            
-            
        
+        
+       #Calculate number gap : 
+           
+
+        
+        dict_digits = { "balls" : list(range(1,50)),
+                            "lucky_number" : list(range(1,11)) 
+            }
+       
+        dict_gap_numbers = dict()
+        
+        gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
+        for variable in name_variables:
+            gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
+            for d in dict_digits[variable]:
+                d
+                variable_to_count = dict_variables[variable] 
+                list_id = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count) & (df_after2008['value']==d)),"annee_numero_de_tirage"].tolist()
+                list_id.sort()
+                gap =  [y - x -1 for x,y in zip(list_id,list_id[1:])]
+                gap.insert(0, list_id[0]-1)
+                max_gap = max(gap)
+                moy_gap = statistics.mean(gap)
+                last_gap = gap[0]
+                gap_numbers_list.append([d, last_gap, max_gap, moy_gap])
+                
+                gap = []
+            df_gap = pd.DataFrame(gap_numbers_list) 
+            df_gap.columns = ["Digit", "Today_gap", "Max_gap", "Mean_gap"]
+            dict_gap_numbers[variable] = df_gap
+            
+                
+            
+
+        
+        
+
     else:
         print("#2: difference between web scrap and url defaut")
      
