@@ -15,7 +15,7 @@ import calendar
 from itertools import permutations
 pd.options.mode.chained_assignment = None  # default='warn'
 import statistics
-       
+import ModuleDB       
 def try_open_url(url):
     try:
         page = requests.get(url) 
@@ -27,7 +27,7 @@ def try_open_url(url):
         page = []
     return page, flag
 
-def df_melt(dfObj): #function to transform the columns of the results in rows. in this way, we will have a only column with results by concurso
+def df_melt(dfObj): #function to transform the columns of the results in rows. in this way, we will have a only column with results by id
          
         nb_start = 9 # skiping two first columns because they represent the index of games. 
         
@@ -134,6 +134,7 @@ if flag_main_url:
              dict_references[tuple(ref)] = df
              
     if sub_urls_from_scrap == sub_urls_defaut:
+        dict_df_toMongoDB = dict()
         
         print("#2: urls extracted successfully from web scrap")
         
@@ -180,7 +181,7 @@ if flag_main_url:
         
         d = dict(enumerate(calendar.month_abbr))
         df_after2008['month'] = df_after2008['month'].map(d)
-        
+        dict_df_toMongoDB["GeneralDF"] = df_after2008
         #Calculating frequencies of numbers.
         
         #Overall frequency.
@@ -273,17 +274,23 @@ if flag_main_url:
            
 
         
-        dict_digits = { "balls" : list(range(1,50)),
-                            "lucky_number" : list(range(1,11)) 
+        dict_digits = { "balls"  : list(range(1,50)),
+                           "lucky_number" : list(range(1,11)) 
             }
+        
+        dict_key_variable = { "balls" : "GapNumber" ,
+                            "lucky_number" : "GapLuckyNumber"
+                            }
        
         dict_gap_numbers = dict()
         
         gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
+        list_flags = []
+        iflag = 0 
         for variable in name_variables:
             gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
             for d in dict_digits[variable]:
-                d
+                
                 variable_to_count = dict_variables[variable] 
                 list_id = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count) & (df_after2008['value']==d)),"annee_numero_de_tirage"].tolist()
                 list_id.sort()
@@ -297,10 +304,34 @@ if flag_main_url:
                 gap = []
             df_gap = pd.DataFrame(gap_numbers_list) 
             df_gap.columns = ["Digit", "Today_gap", "Max_gap", "Mean_gap"]
-            dict_gap_numbers[variable] = df_gap
-            
+            if not df_gap.empty:
+                key = dict_key_variable[variable]
+                dict_gap_numbers[key] = df_gap
+                i_flag = 1 
+                list_flags.append(i_flag)
+                dict_df_toMongoDB[key] = df_gap
                 
-            
+        
+        # MONGO DB UPDATE
+        url_db_main = "mongodb+srv://dbFDJ:vWCuQoKrBXzQN7lI@prod-lotocombine-websit.wh4xe.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+        
+        
+        dict_nomDB_collections = {"ProcessedData" :["GapNumber", "GapLuckyNumber"],
+                      "UnprocessedData" : ["GeneralDF"]
+                      }
+          
+
+        for nomDB_main in dict_nomDB_collections.keys():
+            db_main = ModuleDB.create_open_db(url_db_main,nomDB_main) # creation/opening db
+            for collection in dict_nomDB_collections[nomDB_main]: 
+                if list_flags[i_flag]:# if a dataframe really exists, fill up db
+                    print("-Filling up DB : " + collection)           
+                    db_main[collection].drop() # drop all documents              
+                    ModuleDB.insert_main_db(db_main,collection,dict_df_toMongoDB[collection]) # insert recent documents
+                else:
+                    print("!!!!!!!!!!!!Problem at filling up DB  : " + collection)           
+
+
 
         
         
