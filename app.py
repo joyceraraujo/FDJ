@@ -4,7 +4,7 @@ from PIL import  Image
 from multipage import MultiPage
 import numpy as np
 # from pages import reussite_general, reussite_numero_chance # import your pages here
-import reussite_general, reussite_numero_chance
+import reussite_general, reussite_numero_chance, reussite_timeslice
 # Create an instance of the app 
 app = MultiPage()
 
@@ -20,7 +20,7 @@ col1.title("Super Statistiques Française des Jeux")
 # Add all your applications (pages) here
 app.add_page("Reussite 5 tirages", reussite_general.app)
 app.add_page("Reussite numero de chance", reussite_numero_chance.app)
-
+app.add_page("Reussite par periode", reussite_timeslice.app)
 
 # The main app
 app.run()
