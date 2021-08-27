@@ -14,8 +14,12 @@ from bs4 import BeautifulSoup
 import calendar
 from itertools import permutations
 pd.options.mode.chained_assignment = None  # default='warn'
-import statistics
-import ModuleDB       
+import statistics   
+import streamlit as st   
+import plotly.express as px
+# from multipage import MultiPage
+
+
 def try_open_url(url):
     try:
         page = requests.get(url) 
@@ -191,159 +195,208 @@ if flag_main_url:
         variables_to_count = ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5']
         df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
         dict_frequencies["overall_frequency-balls"] =  calculate_frequency(df_query,list_cols)
+
+
         #Only lucky number: 
         variables_to_count = ['numero_chance']
         df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
         dict_frequencies["overall_frequency-lucky_number"] = calculate_frequency(df_query,list_cols)
-        
-        #Frequency by a timeslice specified.
-        dict_frequencies_by_timeslice = dict()
-        dict_timeslices = {
-                               "year" : df_query['year'].unique(),
-                               "month" : df_query['month'].unique(),
-                               "day" : df_query['day'].unique(),
-                               "day_name":  df_query['day_name'].unique()                              
-                               
-                               }
-        name_timeslices = dict_timeslices.keys()
-        
-        dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],
-                            "lucky_number" : ['numero_chance']
-            }
-        name_variables = dict_variables.keys()
-                
-        for name_timeslice in name_timeslices: # Loop through all timeslices
-            for name_variable in name_variables: # Loop through variables
-                timeslice = dict_timeslices[name_timeslice]
-                variable_to_count = dict_variables[name_variable]
-                df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
-                calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variable,name_timeslice, timeslice,list_cols)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
-        #Frequency by a combinaison of two timeslices specified.
-        dict_frequencies_by_timeslice_comb_by2 = dict()
-        #Combinaison of two timeslices
-        name_timeslices_perm = list(permutations(name_timeslices,2))
-        name_timeslices_perm = set(tuple(sorted(x)) for x in name_timeslices_perm)
+#         #Frequency by a timeslice specified.
+#         dict_frequencies_by_timeslice = dict()
+#         dict_timeslices = {
+#                                "year" : df_query['year'].unique(),
+#                                "month" : df_query['month'].unique(),
+#                                "day" : df_query['day'].unique(),
+#                                "day_name":  df_query['day_name'].unique()                              
+                               
+#                                }
+#         name_timeslices = dict_timeslices.keys()
         
-        for name_timeslice in name_timeslices_perm:
+#         dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],
+#                             "lucky_number" : ['numero_chance']
+#             }
+#         name_variables = dict_variables.keys()
+                
+#         for name_timeslice in name_timeslices: # Loop through all timeslices
+#             for name_variable in name_variables: # Loop through variables
+#                 timeslice = dict_timeslices[name_timeslice]
+#                 variable_to_count = dict_variables[name_variable]
+#                 df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
+#                 calculate_frequency_by_timeslice(df_query,dict_frequencies_by_timeslice, name_variable,name_timeslice, timeslice,list_cols)
+
+        
+#         #Frequency by a combinaison of two timeslices specified.
+#         dict_frequencies_by_timeslice_comb_by2 = dict()
+#         #Combinaison of two timeslices
+#         name_timeslices_perm = list(permutations(name_timeslices,2))
+#         name_timeslices_perm = set(tuple(sorted(x)) for x in name_timeslices_perm)
+        
+#         for name_timeslice in name_timeslices_perm:
             
-            for name_variable in name_variables: # Loop through variables
-                timeslice = [dict_timeslices[name_timeslice[0]], dict_timeslices[name_timeslice[1]]]                
-                variable_to_count = dict_variables[name_variable]
-                df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
-                calculate_frequency_by_timeslice_comb_by2(df_query, dict_frequencies_by_timeslice_comb_by2, name_variable, name_timeslice, timeslice,list_cols)
+#             for name_variable in name_variables: # Loop through variables
+#                 timeslice = [dict_timeslices[name_timeslice[0]], dict_timeslices[name_timeslice[1]]]                
+#                 variable_to_count = dict_variables[name_variable]
+#                 df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
+#                 calculate_frequency_by_timeslice_comb_by2(df_query, dict_frequencies_by_timeslice_comb_by2, name_variable, name_timeslice, timeslice,list_cols)
            
-        #Frequency by a combinaison of three timeslices specified.
-        dict_frequencies_by_timeslice_comb_by3 = dict()
-        #Combinaison of two timeslices
-        name_timeslices_perm = list(permutations(name_timeslices,3))
-        name_timeslices_perm = set(tuple(sorted(x)) for x in name_timeslices_perm)
+#         #Frequency by a combinaison of three timeslices specified.
+#         dict_frequencies_by_timeslice_comb_by3 = dict()
+#         #Combinaison of two timeslices
+#         name_timeslices_perm = list(permutations(name_timeslices,3))
+#         name_timeslices_perm = set(tuple(sorted(x)) for x in name_timeslices_perm)
         
-        for name_timeslice in name_timeslices_perm:            
-            for name_variable in name_variables: # Loop through variables
-                timeslice = [dict_timeslices[name_timeslice[0]], dict_timeslices[name_timeslice[1]], dict_timeslices[name_timeslice[2]]]
-                variable_to_count = dict_variables[name_variable]
-                df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
-                calculate_frequency_by_timeslice_comb_by3(df_query, dict_frequencies_by_timeslice_comb_by3, name_variable, name_timeslice, timeslice,list_cols)
+#         for name_timeslice in name_timeslices_perm:            
+#             for name_variable in name_variables: # Loop through variables
+#                 timeslice = [dict_timeslices[name_timeslice[0]], dict_timeslices[name_timeslice[1]], dict_timeslices[name_timeslice[2]]]
+#                 variable_to_count = dict_variables[name_variable]
+#                 df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]        
+#                 calculate_frequency_by_timeslice_comb_by3(df_query, dict_frequencies_by_timeslice_comb_by3, name_variable, name_timeslice, timeslice,list_cols)
            
-        #Frequency by 'n' last draws : 
-        max_index = df_after2008['new_date'].idxmax() 
-        id_last_draw = df_after2008.loc[max_index,"annee_numero_de_tirage"]
-        dict_frequencies_by_n_last_draws = dict()
-        dict_last_draw  = {
-                               "10" : list(range(id_last_draw,id_last_draw+10)),
-                               "20" : list(range(id_last_draw,id_last_draw+20)),
-                               "30" : list(range(id_last_draw,id_last_draw+30)),
+#         #Frequency by 'n' last draws : 
+#         max_index = df_after2008['new_date'].idxmax() 
+#         id_last_draw = df_after2008.loc[max_index,"annee_numero_de_tirage"]
+#         dict_frequencies_by_n_last_draws = dict()
+#         dict_last_draw  = {
+#                                "10" : list(range(id_last_draw,id_last_draw+10)),
+#                                "20" : list(range(id_last_draw,id_last_draw+20)),
+#                                "30" : list(range(id_last_draw,id_last_draw+30)),
                                 
                                
-                               }
-        n_last_draws = dict_last_draw.keys()
-        name_timeslice = 'annee_numero_de_tirage'
-        for n in n_last_draws: # Loop through all n-last draws
-            range_n = dict_last_draw[n]
-            range_last_draw = dict_last_draw[n]
-            for name_variable in name_variables: # Loop through variables                
-                variable_to_count = dict_variables[name_variable] 
+#                                }
+#         n_last_draws = dict_last_draw.keys()
+#         name_timeslice = 'annee_numero_de_tirage'
+#         for n in n_last_draws: # Loop through all n-last draws
+#             range_n = dict_last_draw[n]
+#             range_last_draw = dict_last_draw[n]
+#             for name_variable in name_variables: # Loop through variables                
+#                 variable_to_count = dict_variables[name_variable] 
     
-                df_query = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count)) & (df_after2008['annee_numero_de_tirage'].isin(range_last_draw))]        
-                dict_frequencies_by_n_last_draws[name_variable, n] = calculate_frequency(df_query,list_cols)
+#                 df_query = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count)) & (df_after2008['annee_numero_de_tirage'].isin(range_last_draw))]        
+#                 dict_frequencies_by_n_last_draws[name_variable, n] = calculate_frequency(df_query,list_cols)
        
         
-       #Calculate number gap : 
+#        #Calculate number gap : 
            
 
         
-        dict_digits = { "balls"  : list(range(1,50)),
-                           "lucky_number" : list(range(1,11)) 
-            }
+#         dict_digits = { "balls"  : list(range(1,50)),
+#                            "lucky_number" : list(range(1,11)) 
+#             }
         
-        dict_key_variable = { "balls" : "GapNumber" ,
-                            "lucky_number" : "GapLuckyNumber"
-                            }
+#         dict_key_variable = { "balls" : "GapNumber" ,
+#                             "lucky_number" : "GapLuckyNumber"
+#                             }
        
-        dict_gap_numbers = dict()
+#         dict_gap_numbers = dict()
         
-        gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
-        list_flags = []
-        iflag = 0 
-        for variable in name_variables:
-            gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
-            for d in dict_digits[variable]:
+#         gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
+#         list_flags = []
+#         iflag = 0 
+#         for variable in name_variables:
+#             gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
+#             for d in dict_digits[variable]:
                 
-                variable_to_count = dict_variables[variable] 
-                list_id = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count) & (df_after2008['value']==d)),"annee_numero_de_tirage"].tolist()
-                list_id.sort()
-                gap =  [y - x -1 for x,y in zip(list_id,list_id[1:])]
-                gap.insert(0, list_id[0]-1)
-                max_gap = max(gap)
-                moy_gap = statistics.mean(gap)
-                last_gap = gap[0]
-                gap_numbers_list.append([d, last_gap, max_gap, moy_gap])
+#                 variable_to_count = dict_variables[variable] 
+#                 list_id = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count) & (df_after2008['value']==d)),"annee_numero_de_tirage"].tolist()
+#                 list_id.sort()
+#                 gap =  [y - x -1 for x,y in zip(list_id,list_id[1:])]
+#                 gap.insert(0, list_id[0]-1)
+#                 max_gap = max(gap)
+#                 moy_gap = statistics.mean(gap)
+#                 last_gap = gap[0]
+#                 gap_numbers_list.append([d, last_gap, max_gap, moy_gap])
                 
-                gap = []
-            df_gap = pd.DataFrame(gap_numbers_list) 
-            df_gap.columns = ["Digit", "Today_gap", "Max_gap", "Mean_gap"]
-            if not df_gap.empty:
-                key = dict_key_variable[variable]
-                dict_gap_numbers[key] = df_gap
-                i_flag = 1 
-                list_flags.append(i_flag)
-                dict_df_toMongoDB[key] = df_gap
+#                 gap = []
+#             df_gap = pd.DataFrame(gap_numbers_list) 
+#             df_gap.columns = ["Digit", "Today_gap", "Max_gap", "Mean_gap"]
+#             if not df_gap.empty:
+#                 key = dict_key_variable[variable]
+#                 dict_gap_numbers[key] = df_gap
+#                 i_flag = 1 
+#                 list_flags.append(i_flag)
+#                 dict_df_toMongoDB[key] = df_gap
                 
         
-        # MONGO DB UPDATE
-        url_db_main = "mongodb+srv://dbFDJ:vWCuQoKrBXzQN7lI@prod-lotocombine-websit.wh4xe.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+#         # # MONGO DB UPDATE
+#         # url_db_main = "mongodb+srv://dbFDJ:vWCuQoKrBXzQN7lI@prod-lotocombine-websit.wh4xe.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
         
         
-        dict_nomDB_collections = {"ProcessedData" :["GapNumber", "GapLuckyNumber"],
-                      "UnprocessedData" : ["GeneralDF"]
-                      }
+#         # dict_nomDB_collections = {"ProcessedData" :["GapNumber", "GapLuckyNumber"],
+#         #               "UnprocessedData" : ["GeneralDF"]
+#         #               }
           
 
-        for nomDB_main in dict_nomDB_collections.keys():
-            db_main = ModuleDB.create_open_db(url_db_main,nomDB_main) # creation/opening db
-            for collection in dict_nomDB_collections[nomDB_main]: 
-                if list_flags[i_flag]:# if a dataframe really exists, fill up db
-                    print("-Filling up DB : " + collection)           
-                    db_main[collection].drop() # drop all documents              
-                    ModuleDB.insert_main_db(db_main,collection,dict_df_toMongoDB[collection]) # insert recent documents
-                else:
-                    print("!!!!!!!!!!!!Problem at filling up DB  : " + collection)           
+#         # for nomDB_main in dict_nomDB_collections.keys():
+#         #     db_main = ModuleDB.create_open_db(url_db_main,nomDB_main) # creation/opening db
+#         #     for collection in dict_nomDB_collections[nomDB_main]: 
+#         #         if list_flags[i_flag]:# if a dataframe really exists, fill up db
+#         #             print("-Filling up DB : " + collection)           
+#         #             db_main[collection].drop() # drop all documents              
+#         #             ModuleDB.insert_main_db(db_main,collection,dict_df_toMongoDB[collection]) # insert recent documents
+#         #         else:
+#         #             print("!!!!!!!!!!!!Problem at filling up DB  : " + collection)           
 
 
 
         
         
 
-    else:
-        print("#2: difference between web scrap and url defaut")
+#     else:
+#         print("#2: difference between web scrap and url defaut")
      
         
 
-else:
-    print("#1:A error to read main url was issued")
+# else:
+#     print("#1:A error to read main url was issued")
     
 
-elapsed = time.time() - start
-print(elapsed)
+# elapsed = time.time() - start
+# print(elapsed)
