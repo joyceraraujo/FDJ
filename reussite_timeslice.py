@@ -46,8 +46,8 @@ def app():
     valid_timeslice = timeslice_has_value.count(True)
     index_timeslice = [index for index, value in enumerate(timeslice) if value != ""]
 
-
-    if st.button("Rechercher"): 
+    
+    if st.button("Rechercher") & valid_timeslice>=1 : 
 
         st.markdown("### Résultats pour la date selectionée")
         
