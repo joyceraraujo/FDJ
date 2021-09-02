@@ -72,7 +72,7 @@ def app ():
 
     if st.button("Rechercher"): 
         if not is_duplicated:
-            st.write(is_duplicated)     
+            # st.write(is_duplicated)     
             # st.write(df_after2008)
 
             st.write(search_df(dict_user_sequency))
