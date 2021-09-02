@@ -106,6 +106,7 @@ def app():
 
 
             df_group.reset_index(inplace=True)
+            df_group  = df_group.astype({"value": int})        
             dict_df_timeslice[name_variable] = df_group.rename(columns={"value": "Numéro", 0: "Réussite"})
         col1, col2 = st.beta_columns(2)
         col1.write("Cinq boules:")

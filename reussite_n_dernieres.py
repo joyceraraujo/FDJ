@@ -8,7 +8,7 @@ def calculate_frequency(dfObj,list_cols): #calculate the frequency of occurences
         df_frequency.reset_index(inplace=True)
         df_frequency.columns = list_cols  
            
-
+        df_frequency  = df_frequency.astype({"value": int})  
         df_frequency.sort_values(by=list_cols[1],ascending=False,inplace=True) #order the number that occurs most of time
         
         return df_frequency
@@ -20,6 +20,7 @@ def calculate_df(nb, variable_to_count):
     id_last_draw = df_after2008.loc[max_index,"annee_numero_de_tirage"]    
     range_last_draw = list(range(id_last_draw,id_last_draw+nb))    
     df_query = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count)) & (df_after2008['annee_numero_de_tirage'].isin(range_last_draw))] 
+          
     list_cols = ["value","frequency"]
 
     return calculate_frequency(df_query,list_cols)
