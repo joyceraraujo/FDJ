@@ -26,7 +26,7 @@ def calculate_df(nb, variable_to_count):
 
 def app():
 
-    nb = st.slider('Selectionez le numero de tirages ', min_value=1, value=50 ,max_value=50)
+    nb = st.slider('Selectionez le nombre de tirages ', min_value=1, value=50 ,max_value=50)
 
     
 

@@ -3,20 +3,20 @@ import streamlit as st
 import pandas as pd
 
 
-def calculate_df(df):
-        dict_timeslices = {
-                               "year" : df['year'].unique(),
-                               "month" : df['month'].unique(),
-                               "day" : df['day'].unique(),
-                               "day_name":  df['day_name'].unique()                              
+# def calculate_df(df):
+#         dict_timeslices = {
+#                                "year" : df['year'].unique(),
+#                                "month" : df['month'].unique(),
+#                                "day" : df['day'].unique(),
+#                                "day_name":  df['day_name'].unique()                              
                                
-                               }
-        name_timeslices = dict_timeslices.keys()
+#                                }
+#         name_timeslices = dict_timeslices.keys()
         
-        dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],
-                            "lucky_number" : ['numero_chance']
-            }
-        name_variables = dict_variables.keys()
+#         dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],
+#                             "lucky_number" : ['numero_chance']
+#             }
+#         name_variables = dict_variables.keys()
 
 
 #from streamlit, get timeslice selected
@@ -45,10 +45,10 @@ def app():
     timeslice_has_value = [timeslice != "" for timeslice in timeslice]
     valid_timeslice = timeslice_has_value.count(True)
     index_timeslice = [index for index, value in enumerate(timeslice) if value != ""]
-
     
-    if st.button("Rechercher") & valid_timeslice>=1 : 
-
+    
+    if st.button("Rechercher") : #& valid_timeslice>=1 : 
+        
         st.markdown("### Résultats pour la date selectionée")
         
         dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],

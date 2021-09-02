@@ -53,7 +53,45 @@ def calculate_frequency(dfObj,list_cols): #calculate the frequency of occurences
         
         return df_frequency
     
+def calculate_df_gap(df):
+    
+        dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],
+                            "lucky_number" : ['numero_chance']
+            }
+        name_variables = dict_variables.keys()
 
+        dict_digits = { "balls"  : list(range(1,50)),
+                           "lucky_number" : list(range(1,11)) 
+            }
+        
+        dict_key_variable = { "balls" : "GapNumber" ,
+                            "lucky_number" : "GapLuckyNumber"
+                            }
+       
+        dict_gap_numbers = dict()
+        
+        gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
+        list_flags = []
+        iflag = 0 
+        for variable in name_variables:
+            gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
+            for d in dict_digits[variable]:
+                
+                variable_to_count = dict_variables[variable] 
+                list_id = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count) & (df_after2008['value']==d)),"annee_numero_de_tirage"].tolist()
+                list_id.sort()
+                gap =  [y - x -1 for x,y in zip(list_id,list_id[1:])]
+                gap.insert(0, list_id[0]-1)
+                max_gap = max(gap)
+                moy_gap = statistics.mean(gap)
+                last_gap = gap[0]
+                gap_numbers_list.append([d, last_gap, max_gap, moy_gap])
+                
+                gap = []
+            df_gap = pd.DataFrame(gap_numbers_list) 
+            df_gap.columns = ["Digit", "Today_gap", "Max_gap", "Mean_gap"]
+            dict_gap_numbers[variable] = df_gap
+        return dict_gap_numbers
          
 start = time.time()    
 #sub_url_defaut helps to validate the result of data scrapping.     
@@ -165,76 +203,11 @@ if flag_main_url:
         df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
         dict_frequencies["overall_frequency-lucky_number"] = calculate_frequency(df_query,list_cols)
 
-
-           
-#         #Frequency by 'n' last draws : 
-#         max_index = df_after2008['new_date'].idxmax() 
-#         id_last_draw = df_after2008.loc[max_index,"annee_numero_de_tirage"]
-#         dict_frequencies_by_n_last_draws = dict()
-#         dict_last_draw  = {
-#                                "10" : list(range(id_last_draw,id_last_draw+10)),
-#                                "20" : list(range(id_last_draw,id_last_draw+20)),
-#                                "30" : list(range(id_last_draw,id_last_draw+30)),
-                                
-                               
-#                                }
-#         n_last_draws = dict_last_draw.keys()
-#         name_timeslice = 'annee_numero_de_tirage'
-#         for n in n_last_draws: # Loop through all n-last draws
-#             range_n = dict_last_draw[n]
-#             range_last_draw = dict_last_draw[n]
-#             for name_variable in name_variables: # Loop through variables                
-#                 variable_to_count = dict_variables[name_variable] 
     
-#                 df_query = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count)) & (df_after2008['annee_numero_de_tirage'].isin(range_last_draw))]        
-#                 dict_frequencies_by_n_last_draws[name_variable, n] = calculate_frequency(df_query,list_cols)
-       
-        
-#        #Calculate number gap : 
-           
+       #Calculate number gap : 
+        dict_gap_numbers  = calculate_df_gap(df_after2008)
 
-        
-#         dict_digits = { "balls"  : list(range(1,50)),
-#                            "lucky_number" : list(range(1,11)) 
-#             }
-        
-#         dict_key_variable = { "balls" : "GapNumber" ,
-#                             "lucky_number" : "GapLuckyNumber"
-#                             }
-       
-#         dict_gap_numbers = dict()
-        
-#         gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
-#         list_flags = []
-#         iflag = 0 
-#         for variable in name_variables:
-#             gap_numbers_list = [] # list of dictionaries in which each dictionary corresponds to an input data row
-#             for d in dict_digits[variable]:
-                
-#                 variable_to_count = dict_variables[variable] 
-#                 list_id = df_after2008.loc[(df_after2008['variable'].isin(variable_to_count) & (df_after2008['value']==d)),"annee_numero_de_tirage"].tolist()
-#                 list_id.sort()
-#                 gap =  [y - x -1 for x,y in zip(list_id,list_id[1:])]
-#                 gap.insert(0, list_id[0]-1)
-#                 max_gap = max(gap)
-#                 moy_gap = statistics.mean(gap)
-#                 last_gap = gap[0]
-#                 gap_numbers_list.append([d, last_gap, max_gap, moy_gap])
-                
-#                 gap = []
-#             df_gap = pd.DataFrame(gap_numbers_list) 
-#             df_gap.columns = ["Digit", "Today_gap", "Max_gap", "Mean_gap"]
-#             if not df_gap.empty:
-#                 key = dict_key_variable[variable]
-#                 dict_gap_numbers[key] = df_gap
-#                 i_flag = 1 
-#                 list_flags.append(i_flag)
-#                 dict_df_toMongoDB[key] = df_gap
-                
-        
-       
-        
-
+    
     else:
         print("#2: difference between web scrap and url defaut")
      
