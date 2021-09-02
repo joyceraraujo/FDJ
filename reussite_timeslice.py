@@ -5,28 +5,6 @@ from calendar import month_name
 from calendar import day_name
 
 
-# def calculate_df(df):
-#         dict_timeslices = {
-#                                "year" : df['year'].unique(),
-#                                "month" : df['month'].unique(),
-#                                "day" : df['day'].unique(),
-#                                "day_name":  df['day_name'].unique()                              
-                               
-#                                }
-#         name_timeslices = dict_timeslices.keys()
-        
-#         dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],
-#                             "lucky_number" : ['numero_chance']
-#             }
-#         name_variables = dict_variables.keys()
-
-
-#from streamlit, get timeslice selected
-
-# year_selected = 
-# month_selected =
-# day_selected =
-# day_week_selected =
 
 def options_menu (df,col):
 
