@@ -199,7 +199,8 @@ if flag_main_url:
         for name_variable in name_variables: # Loop through variables
                 
                 variable_to_count = dict_variables[name_variable]         
-                df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]                
+                df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]   
+                df_query  = df_query.astype({"value": int})             
                 dict_frequencies[name_variable] = calculate_frequency(df_query,list_cols).rename(columns={"value": "Numéro", "frequency": "Réussite"})
 
 
