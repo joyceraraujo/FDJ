@@ -26,7 +26,7 @@ def calculate_df(nb, variable_to_count):
 
 def app():
 
-    nb = st.slider('Selectionez le nombre de tirages ', min_value=1, value=50 ,max_value=50)
+    nb = st.slider('Sélectionnez le nombre de tirages ', min_value=1, value=50 ,max_value=50)
 
     
 
@@ -42,12 +42,12 @@ def app():
             
             variable_to_count = dict_variables[name_variable]         
             
-            dict_df[name_variable] = calculate_df(nb, variable_to_count)
+            dict_df[name_variable] = calculate_df(nb, variable_to_count).rename(columns={"value": "Numéro", "frequency": "Réussite"})
 
 
     col1, col2 = st.beta_columns(2)
-    col1.write("5 boules:")
-    col2.write("numero de chance:")
+    col1.write("Cinq boules:")
+    col2.write("Numéro de chance:")
 
     col1, col2 = st.beta_columns(2)
 

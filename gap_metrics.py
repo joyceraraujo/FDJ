@@ -7,8 +7,8 @@ def app():
     st.markdown("## Metriques sur les écarts")
 
     col1, col2 = st.beta_columns(2)
-    col1.write("5 boules:")
-    col2.write("numero de chance:")
+    col1.write("Cinq boules:")
+    col2.write("Numéro de chance:")
 
     col1, col2 = st.beta_columns(2)
 

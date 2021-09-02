@@ -89,7 +89,7 @@ def calculate_df_gap(df):
                 
                 gap = []
             df_gap = pd.DataFrame(gap_numbers_list) 
-            df_gap.columns = ["Digit", "Today_gap", "Max_gap", "Mean_gap"]
+            df_gap.columns = ["Numéro", "Écart Actuel", "Écart Max", "Écart Moyen"]
             dict_gap_numbers[variable] = df_gap
         return dict_gap_numbers
          
@@ -187,21 +187,23 @@ if flag_main_url:
         d = dict(enumerate(calendar.month_abbr))
         df_after2008['month'] = df_after2008['month'].map(d)
         dict_df_toMongoDB["GeneralDF"] = df_after2008
-        #Calculating frequencies of numbers.
-        
-        #Overall frequency.
-        #All balls:        
-        list_cols = ["value","frequency"]
+
+        #Calculating frequencies of numbers
+
+        dict_variables = { "balls" : ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5'],
+                                "lucky_number" : ['numero_chance']
+                }
+        name_variables = dict_variables.keys()
+        list_cols = ["value","frequency"]            
         dict_frequencies = dict()
-        variables_to_count = ['boule_1', 'boule_2', 'boule_3', 'boule_4','boule_5']
-        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
-        dict_frequencies["overall_frequency-balls"] =  calculate_frequency(df_query,list_cols)
+        for name_variable in name_variables: # Loop through variables
+                
+                variable_to_count = dict_variables[name_variable]         
+                df_query = df_after2008.loc[df_after2008['variable'].isin(variable_to_count)]                
+                dict_frequencies[name_variable] = calculate_frequency(df_query,list_cols).rename(columns={"value": "Numéro", "frequency": "Réussite"})
 
 
-        #Only lucky number: 
-        variables_to_count = ['numero_chance']
-        df_query = df_after2008.loc[df_after2008['variable'].isin(variables_to_count)]
-        dict_frequencies["overall_frequency-lucky_number"] = calculate_frequency(df_query,list_cols)
+
 
     
        #Calculate number gap : 

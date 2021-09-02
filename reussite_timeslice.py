@@ -1,6 +1,8 @@
 from data_processing import df_after2008
 import streamlit as st
 import pandas as pd
+from calendar import month_name
+from calendar import day_name
 
 
 # def calculate_df(df):
@@ -27,9 +29,32 @@ import pandas as pd
 # day_week_selected =
 
 def options_menu (df,col):
-    list = df_after2008[col].unique().tolist()
-    list.insert(0,"")
-    return list
+
+    if col=="month":
+        list_menu = df_after2008[col].unique().tolist()        
+        month_lookup = list(month_name)
+        month_lookup = [name[0:3] for name in month_lookup]
+        list_menu = sorted(list_menu, key=month_lookup.index)
+        list_menu.insert(0,"")
+
+    if col=="year":
+        list_menu = df_after2008[col].unique().tolist()
+        list_menu.insert(0,"")
+
+    if col=="day":
+        list_menu = sorted(df_after2008[col].unique().tolist())
+        
+        list_menu.insert(0,"")
+
+    if col=="day_name":
+        list_menu = df_after2008[col].unique().tolist()
+        day_name_lookup = list(day_name)      
+        
+        list_menu = sorted(list_menu, key=day_name_lookup.index)
+        list_menu.insert(0,"")
+
+
+    return list_menu
 
 def app():
     col1, col2, col3, col4 = st.beta_columns(4)
@@ -46,7 +71,7 @@ def app():
     valid_timeslice = timeslice_has_value.count(True)
     index_timeslice = [index for index, value in enumerate(timeslice) if value != ""]
     
-    
+    print(day_name)
     if st.button("Rechercher") : #& valid_timeslice>=1 : 
         
         st.markdown("### Résultats pour la date selectionée")
@@ -103,10 +128,10 @@ def app():
 
 
             df_group.reset_index(inplace=True)
-            dict_df_timeslice[name_variable] = df_group
+            dict_df_timeslice[name_variable] = df_group.rename(columns={"value": "Numéro", 0: "Réussite"})
         col1, col2 = st.beta_columns(2)
-        col1.write("5 boules:")
-        col2.write("numero de chance:")
+        col1.write("Cinq boules:")
+        col2.write("Numéro de chance:")
 
         col1, col2 = st.beta_columns(2)
 
