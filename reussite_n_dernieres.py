@@ -46,11 +46,11 @@ def app():
             dict_df[name_variable] = calculate_df(nb, variable_to_count).rename(columns={"value": "Numéro", "frequency": "Réussite"})
 
 
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
     col1.write("Cinq boules:")
     col2.write("Numéro de chance:")
 
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
 
     col1.write(dict_df["balls"])
     col2.write(dict_df["lucky_number"])

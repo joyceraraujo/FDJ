@@ -54,7 +54,7 @@ def app ():
     values = range(1,50,1)
     values_chance = range(1,11,1)
 
-    bol1,bol2,bol3,bol4,bol5,bol6 = st.beta_columns(6)
+    bol1,bol2,bol3,bol4,bol5,bol6 = st.columns(6)
     nb5 = list()
     bol1 = bol1.selectbox("boule 1",values)
     bol2 = bol2.selectbox("boule 2",values)

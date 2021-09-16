@@ -35,7 +35,7 @@ def options_menu (df,col):
     return list_menu
 
 def app():
-    col1, col2, col3, col4 = st.beta_columns(4)
+    col1, col2, col3, col4 = st.columns(4)
 
 
     year = col1.selectbox("Année", options = options_menu(df_after2008, "year") )
@@ -108,11 +108,11 @@ def app():
             df_group.reset_index(inplace=True)
             df_group  = df_group.astype({"value": int})        
             dict_df_timeslice[name_variable] = df_group.rename(columns={"value": "Numéro", 0: "Réussite"})
-        col1, col2 = st.beta_columns(2)
+        col1, col2 = st.columns(2)
         col1.write("Cinq boules:")
         col2.write("Numéro de chance:")
 
-        col1, col2 = st.beta_columns(2)
+        col1, col2 = st.columns(2)
 
         col1.write(dict_df_timeslice["balls"])
         col2.write(dict_df_timeslice["lucky_number"])

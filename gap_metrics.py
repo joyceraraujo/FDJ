@@ -6,11 +6,11 @@ import streamlit as st
 def app():
     st.markdown("## Metriques sur les écarts")
 
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
     col1.write("Cinq boules:")
     col2.write("Numéro de chance:")
 
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
 
     col1.write(dict_gap_numbers["balls"])
     col2.write(dict_gap_numbers["lucky_number"])

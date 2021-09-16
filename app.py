@@ -13,7 +13,7 @@ app = MultiPage()
 display = Image.open('fdj.jpg')
 # display = np.array(display)
 # st.image(display, width = 100)
-col1, col2 = st.beta_columns(2)
+col1, col2 = st.columns(2)
 col2.image(display, width = 150)
 col1.title("Super Statistiques Française des Jeux")
 
